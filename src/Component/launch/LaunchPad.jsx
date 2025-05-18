@@ -37,8 +37,8 @@ const LaunchPad = () => {
     }
   
     try {
-      const mint = Keypair.generate();
-      const lamports = await getMinimumBalanceForRentExemptMint(connection);
+      const mint = Keypair.generate(); // Generates a new Solana keypair for the token mint account (like the “root” of your token).
+      const lamports = await getMinimumBalanceForRentExemptMint(connection); // Calculate Rent-Exemption for Mint
   
       // Instruction to create the mint account
       const createMintAccountIx = SystemProgram.createAccount({
@@ -47,23 +47,23 @@ const LaunchPad = () => {
         space: MINT_SIZE,
         lamports,
         programId: TOKEN_PROGRAM_ID,
-      });
+      }); // Instructs Solana to allocate memory and SOL for the new token mint.
   
       // Initialize mint instruction
       const initMintIx = createInitializeMintInstruction(
         mint.publicKey,
         9, // decimals
-        publicKey,
-        publicKey
+        publicKey, // publicKey as the mint authority
+        publicKey // publicKey as the freeze authority
       );
   
       // Derive associated token account address
       const associatedTokenAddress = await getAssociatedTokenAddress(
         mint.publicKey,
         publicKey
-      );
+      ); // Finds the user’s token account address where tokens of this mint will be held.
   
-      const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
+      const accountInfo = await connection.getAccountInfo(associatedTokenAddress); // Checks if the ATA already exists.
   
       const transaction = new Transaction().add(
         createMintAccountIx,
@@ -79,7 +79,7 @@ const LaunchPad = () => {
           mint.publicKey           // token mint
         );
         transaction.add(createATAIx);
-      }
+      } 
   
       // Mint instruction to send tokens to the user's ATA
       const mintToIx = createMintToInstruction(
